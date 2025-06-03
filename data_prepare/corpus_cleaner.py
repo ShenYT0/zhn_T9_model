@@ -2,12 +2,12 @@ from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
 
-from file_handler import FileHandler
-from t9_hanzi_converter import T9PinyinHanziConverter
+from tools.file_handler import FileHandler
+from tools.t9_hanzi_converter import T9PinyinHanziConverter
 
 
-class T9DataPreparer:
-    def __init__(self, pinyin_dir: Path = Path("./data/xml/pinyin"), char_dir: Path = Path("data/xml/character")) -> None:
+class CorpusCleaner:
+    def __init__(self, pinyin_dir: Path = Path("../data/xml/pinyin"), char_dir: Path = Path("../data/xml/character")) -> None:
         """Initialize T9DataPreparer with directories for pinyin and character XML files."""
         self.pinyin_dir = pinyin_dir
         self.char_dir = char_dir
@@ -33,8 +33,8 @@ class T9DataPreparer:
             if len(pinyin_words) != len(char_words):
                 continue
             for pinyin, hanzi in zip(pinyin_words, char_words):
-                syllables = T9DataPreparer.split_polyphonic(pinyin)
-                normalized = T9DataPreparer.remove_tone_numbers(T9DataPreparer.normalize_pinyin(syllables))
+                syllables = CorpusCleaner.split_polyphonic(pinyin)
+                normalized = CorpusCleaner.remove_tone_numbers(CorpusCleaner.normalize_pinyin(syllables))
                 pinyin_seq = ''.join(normalized)
                 digit_seq = T9PinyinHanziConverter.pinyin2t9(''.join(normalized))
                 if digit_seq and hanzi:
@@ -60,7 +60,7 @@ class T9DataPreparer:
                     if text:
                         tokens.append(text)
             if tokens:
-                sentence = ''.join(tokens)
+                sentence = ' '.join(tokens)
                 sentences.append(sentence)
         return sentences
 

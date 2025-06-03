@@ -1,5 +1,4 @@
 from pathlib import Path
-from xml.etree import ElementTree as ET
 
 
 class FileHandler:
