@@ -180,4 +180,4 @@ data/
 models/model_checkpoints/
 
 training/logs/
-trainig/tuner_dir
+training/tuner_dir
