@@ -176,3 +176,8 @@ cython_debug/
 data/
 **/.DS_Store
 **/.idea/
+
+models/model_checkpoints/
+
+training/logs/
+trainig/tuner_dir
