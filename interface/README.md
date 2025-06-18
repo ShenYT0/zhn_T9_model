@@ -1,22 +1,27 @@
-# Streamlit T9 Demo
+# zhn_T9_model
+This is a **Streamlit-based web demo** for a Chinese **T9 (九键) predictive input method**. It simulates the classic mobile keypad input experience with real-time character prediction based on the current input context and numeric key codes.
 
-## How to start
+## How to run
+In terminal:
 
 ```
-streamlit run demo.py
+pip install -r requirements.txt
+streamlit run interface/demo.py   
 ```
 
-## Functions need to replace in dummy
+## Application of the model
+Call the model directly from the pipeline.
+```python
+async def input_predict(text:str) -> list[str]:
+    pipe = Pipeline()
+    candidats = pipe.predict(text)
+    return candidats
+```
 
-- pinyin_to_hanzi
-    - input: pinyin string (exp: "di")
-    - output: hanzi predict list (exp: "["第", "地", "底", "低", ...]")
-- code_to_pinyin
-    - input: T9 code (exp: "3426")
-    - output: hanzi predict list 
-- code_to_hanzi
-    - input: T9 code (exp: "3426")
-    - output: pinyin predict list (exp: "["dian", "dibo", ...]")
-- predict_next_hanzi
-    - input : context string
-    - output : a hanzi
+## Example Use Case
+The content of the text box above can be freely edited.
+The currently entered T9 code and predictions based on context and code are displayed below.
+The 1 key is used to enter punctuation marks, which are not considered here.
+
+![Example](../imgs/image.png)
+
