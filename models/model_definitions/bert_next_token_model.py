@@ -15,8 +15,7 @@ class BertNextTokenModel(nn.Module):
             num_hidden_layers=num_layers,
             max_position_embeddings=max_len,
             hidden_dropout_prob=dropout,
-            attention_probs_dropout_prob=dropout,
-            pad_token_id=tokenizer.pad_token_id
+            attention_probs_dropout_prob=dropout
         )
         self.bert = BertModel(config)
         self.cls_head = nn.Linear(embed_dim, vocab_size)

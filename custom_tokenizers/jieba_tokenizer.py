@@ -8,11 +8,9 @@ import os
 jieba_dict_path = os.path.join(os.path.dirname(__file__), 'jieba_dict.txt')
 jieba.load_userdict(os.path.abspath(jieba_dict_path))
 
-device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))
-
 
 class JiebaLikeTokenizer:
-    def __init__(self, vocab_path=None, unk_token="[UNK]", pad_token="[PAD]", device=device):
+    def __init__(self, vocab_path=None, unk_token="[UNK]", pad_token="[PAD]", device=torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))):
         if vocab_path is None:
             vocab_path = Path(__file__).parent / "jieba_vocab.txt"
         else:

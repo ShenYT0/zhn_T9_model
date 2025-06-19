@@ -1,9 +1,11 @@
 datasets==3.6.0
-ipython==9.3.0
 ipython==8.12.3
 jieba==0.42.1
 kt_legacy==1.0.5
 matplotlib==3.10.3
+notebook
+ipykernel
+ipywidgets
 pypinyin==0.54.0
 setuptools==65.5.0
 streamlit==1.45.1
