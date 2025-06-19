@@ -1,132 +1,90 @@
 import streamlit as st
 import asyncio
-from dummy import code_to_pinyin, code_to_hanzi, pinyin_to_hanzi, predict_next_hanzi
+# from dummy import input_predict
+from predict import input_predict
 
-# Initialize session state variables
-if 'text' not in st.session_state:
+if "text" not in st.session_state:
     st.session_state.text = ""
-if 'code' not in st.session_state:
-    st.session_state.code = ""
-if 'selected_pinyin' not in st.session_state:
-    st.session_state.selected_pinyin = ""
-if 'hanzi_page' not in st.session_state:
-    st.session_state.hanzi_page = 0
-if 'pinyin_page' not in st.session_state:
-    st.session_state.pinyin_page = 0
-if 'show_punct' not in st.session_state:
-    st.session_state.show_punct = False
+if "cursor" not in st.session_state:
+    st.session_state.cursor = len(st.session_state.text)
+if "code_input" not in st.session_state:
+    st.session_state.code_input = ""
+if "candidates" not in st.session_state:
+    st.session_state.candidates = []
+if "page" not in st.session_state:
+    st.session_state.page = 0
 
-st.session_state.text = st.text_area("", st.session_state.text, height=150)
+async def update_candidates():
+    query = st.session_state.text[:st.session_state.cursor] + st.session_state.code_input
+    st.session_state.candidates = await input_predict(query)
+    st.session_state.page = 0
+    st.rerun()
 
-async def get_predictions():
-    hanzi_candidates = []
-    pinyin_candidates = []
+def insert_text_at_cursor(new_text):
+    before = st.session_state.text[:st.session_state.cursor]
+    after = st.session_state.text[st.session_state.cursor:]
+    st.session_state.text = before + new_text + after
+    st.session_state.cursor += len(new_text)
 
-    if st.session_state.show_punct:
-        hanzi_candidates = ["，", "。"]
-    elif st.session_state.code:
-        if st.session_state.selected_pinyin:
-            hanzi_candidates = await pinyin_to_hanzi(st.session_state.selected_pinyin)
-        else:
-            hanzi_candidates = await code_to_hanzi(st.session_state.code)
-            pinyin_candidates = await code_to_pinyin(st.session_state.code)
-    elif st.session_state.text:
-        hanzi_candidates = await predict_next_hanzi(st.session_state.text)
+def handle_delete():
+    if st.session_state.code_input:
+        st.session_state.code_input = st.session_state.code_input[:-1]
+    elif st.session_state.cursor > 0:
+        st.session_state.text = (
+            st.session_state.text[:st.session_state.cursor - 1] +
+            st.session_state.text[st.session_state.cursor:]
+        )
+        st.session_state.cursor -= 1
 
-    return hanzi_candidates, pinyin_candidates
+text_val = st.text_area(
+    "",
+    value=st.session_state.text,
+    height=150,
+)
 
-hanzi_candidates, pinyin_candidates = asyncio.run(get_predictions())
+if text_val != st.session_state.text:
+    st.session_state.text = text_val
+    st.session_state.cursor = len(text_val)
 
-cols = st.columns(7)
-start = st.session_state.hanzi_page * 5
-for i, hanzi in enumerate(hanzi_candidates[start:start+5]):
-    if cols[i+1].button(hanzi):
-        st.session_state.text += hanzi
-        st.session_state.code = ""
-        st.session_state.selected_pinyin = ""
-        st.session_state.hanzi_page = 0
-        st.session_state.pinyin_page = 0
-        st.session_state.show_punct = False
-        st.rerun()
+left, cand_cols, right = st.columns([1, 8, 1])
+with left:
+    if st.button("⬅️") and st.session_state.page > 0:
+        st.session_state.page -= 1
+with right:
+    if st.button("➡️") and (st.session_state.page + 1) * 5 < len(st.session_state.candidates):
+        st.session_state.page += 1
 
-with cols[0]:
-    if st.button("⬅️") and st.session_state.hanzi_page > 0:
-        st.session_state.hanzi_page -= 1
-        st.rerun()
-with cols[-1]:
-    if st.button("➡️") and (start + 5) < len(hanzi_candidates):
-        st.session_state.hanzi_page += 1
-        st.rerun()
+with cand_cols:
+    cand_row = st.columns(5)
+    start = st.session_state.page * 5
+    for i, candidate in enumerate(st.session_state.candidates[start:start + 5]):
+        if cand_row[i].button(candidate, key=f"cand_{i}"):
+            insert_text_at_cursor(candidate)
+            st.session_state.code_input = ""
+            asyncio.run(update_candidates())
 
-# show predict pinyin candidates
-if st.session_state.code and not st.session_state.selected_pinyin:
-    cols = st.columns(7)
-    start = st.session_state.pinyin_page * 5
-    for i, py in enumerate(pinyin_candidates[start:start+5]):
-        if cols[i+1].button(py):
-            st.session_state.selected_pinyin = py
-            st.session_state.hanzi_page = 0
-            st.rerun()
-    with cols[0]:
-        if st.button("⬅️ ", key="pinyin_prev") and st.session_state.pinyin_page > 0:
-            st.session_state.pinyin_page -= 1
-            st.rerun()
-    with cols[-1]:
-        if st.button("➡️ ", key="pinyin_next") and (start + 5) < len(pinyin_candidates):
-            st.session_state.pinyin_page += 1
-            st.rerun()
+st.text(f"当前输入: {st.session_state.code_input}")
 
-# T9 Keypad
-def handle_keypress(key):
-    if key == "⌫":
-        if st.session_state.code:
-            st.session_state.code = ""
-            st.session_state.selected_pinyin = ""
-        elif st.session_state.text:
-            st.session_state.text = st.session_state.text[:-1]
-        st.session_state.show_punct = False
-        st.rerun()
-    elif key == "space":
-        if st.session_state.code:
-            st.session_state.text += hanzi_candidates[0] if hanzi_candidates else ""
-            st.session_state.code = ""
-            st.session_state.selected_pinyin = ""
-        st.session_state.text += " "
-        st.session_state.show_punct = False
-        st.rerun()
-    elif key == "punct":
-        if st.session_state.code:
-            st.session_state.text += hanzi_candidates[0] if hanzi_candidates else ""
-            st.session_state.code = ""
-            st.session_state.selected_pinyin = ""
-        st.session_state.show_punct = True
-        st.rerun()
-    elif key in [str(i) for i in range(10)]:
-        if key == "0":
-            handle_keypress("space")
-        elif key == "1":
-            handle_keypress("punct")
-        else:
-            st.session_state.code += key
-            st.session_state.selected_pinyin = ""
-            st.session_state.show_punct = False
-            st.rerun()
-
-keys = [
-    ["1", "2", "3"],
-    ["4", "5", "6"],
-    ["7", "8", "9"],
-    ["", "0", "⌫"]
+keypad = [
+    ["1\n，。", "2\nABC", "3\nDEF"],
+    ["4\nGHI", "5\nJKL", "6\nMNO"],
+    ["7\nPQRS", "8\nTUV", "9\nWXYZ"],
+    ["", "0\n␣", "⌫"]
 ]
-labels = {
-    "1": "，。", "2": "ABC", "3": "DEF",
-    "4": "GHI", "5": "JKL", "6": "MNO",
-    "7": "PQRS", "8": "TUV", "9": "WXYZ",
-    "0": "␣", "⌫": ""
-}
-
-for row in keys:
+for row in keypad:
     cols = st.columns(3)
-    for i, key in enumerate(row):
-        if key and cols[i].button(f"{key}\n\n{labels[key]}"):
-            handle_keypress(key)
+    for i, label in enumerate(row):
+        if label == "":
+            continue
+        key_label = label.split("\n")[0]
+        if cols[i].button(label):
+            if key_label == "1":
+                pass
+            elif key_label == "⌫":
+                handle_delete()
+                asyncio.run(update_candidates())
+            elif key_label == "0":
+                insert_text_at_cursor(" ")
+            else:
+                st.session_state.code_input += key_label
+                asyncio.run(update_candidates())
