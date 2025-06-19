@@ -2,9 +2,12 @@ import jieba
 import torch
 
 from pathlib import Path
+import os
 
 
-jieba.load_userdict("../data/training_data/jieba_dict.txt")
+jieba_dict_path = os.path.join(os.path.dirname(__file__), 'jieba_dict.txt')
+jieba.load_userdict(os.path.abspath(jieba_dict_path))
+
 device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))
 
 
@@ -43,7 +46,7 @@ class JiebaLikeTokenizer:
                 result.append(token)
 
         if truncation and len(result) > max_len:
-            result = result[:padding_length]
+            result = result[-max_len:]
         if padding and len(result) < padding_length:
             result.extend([self.pad_token] * (padding_length - len(result)))
 

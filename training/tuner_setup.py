@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from bert_next_token_model import BertNextTokenModel
+from models.model_definitions.bert_next_token_model import BertNextTokenModel
 
 
 class TransformerHyperModel(HyperModel):

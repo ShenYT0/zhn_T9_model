@@ -1,4 +1,9 @@
+
+from models.pipeline import Pipeline
+
 import asyncio
+
+
 
 async def pinyin_to_hanzi(pinyin: str):
     return ["你", "好", "是", "在", "他", "啦", "的", "中", "和", "国", "人", "们", "来", "了", "就", "说", "要", "不", "有"]
@@ -25,8 +30,16 @@ async def code_to_pinyin(code: str):
 
     return [''.join(item) for item in combinations]
 
-async def code_to_hanzi(code: str):
-    return ["泥", "你", "尼", "呢", "内", "那", "哪", "娜", "纳", "南", "难", "男", "脑", "闹", "挠", "闹"]
 
+async def code_to_hanzi(current_input: str, pipe=Pipeline()):
+    return pipe.predict(current_input)
+
+
+async def predict_next_hanzi(current_input: str, pipe=Pipeline()):
+    return pipe.predict(current_input)
+
+
+"""
 async def predict_next_hanzi(current_input: str):
     return ["是", "在", "的", "来", "了", "就", "说", "要", "不", "有"]
+"""

@@ -1,4 +1,4 @@
-from model_definitions.bert_next_token_model import BertNextTokenModel
+from models.model_definitions.bert_next_token_model import BertNextTokenModel
 from custom_tokenizers.jieba_tokenizer import JiebaLikeTokenizer
 
 

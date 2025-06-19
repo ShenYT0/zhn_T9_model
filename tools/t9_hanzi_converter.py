@@ -3,29 +3,11 @@ from pypinyin import lazy_pinyin
 
 class T9PinyinHanziConverter:
     @staticmethod
-    def hanzi2pinyin(hanzi: str) -> list[str]:
-        """
-        Convert a Chinese string into its corresponding pinyin sequence without tone marks.
-
-        Args:
-            hanzi: A string of Chinese characters.
-
-        Returns:
-            A string of pinyin syllables separated by spaces.
-        """
-        return lazy_pinyin(hanzi)
+    def hanzi2pinyin(hanzi: str) -> str:
+        return "".join(lazy_pinyin(hanzi))
 
     @staticmethod
     def pinyin2t9(pinyin: str) -> str:
-        """
-        Convert a string of pinyin syllables into a T9 digit string.
-
-        Args:
-            pinyin: A string of pinyin syllables (e.g., 'ni hao').
-
-        Returns:
-            A string of digits representing the T9 encoding (e.g., '64426').
-        """
         t9_map = {
             'a': '2', 'b': '2', 'c': '2',
             'd': '3', 'e': '3', 'f': '3',
@@ -37,3 +19,9 @@ class T9PinyinHanziConverter:
             'w': '9', 'x': '9', 'y': '9', 'z': '9',
         }
         return ''.join(t9_map.get(char, '') for char in pinyin.lower() if char.isalpha())
+
+    @staticmethod
+    def hanzi2t9(hanzi: str) -> str:
+        pinyin = T9PinyinHanziConverter.hanzi2pinyin(hanzi)
+        t9 = T9PinyinHanziConverter.pinyin2t9(pinyin)
+        return t9
