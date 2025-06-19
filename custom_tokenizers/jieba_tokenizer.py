@@ -8,9 +8,11 @@ import os
 jieba_dict_path = os.path.join(os.path.dirname(__file__), 'jieba_dict.txt')
 jieba.load_userdict(os.path.abspath(jieba_dict_path))
 
+device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))
+
 
 class JiebaLikeTokenizer:
-    def __init__(self, vocab_path=None, unk_token="[UNK]", pad_token="[PAD]", device=torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))):
+    def __init__(self, vocab_path=None, unk_token="[UNK]", pad_token="[PAD]", device=device):
         if vocab_path is None:
             vocab_path = Path(__file__).parent / "jieba_vocab.txt"
         else:
@@ -44,7 +46,7 @@ class JiebaLikeTokenizer:
                 result.append(token)
 
         if truncation and len(result) > max_len:
-            result = result[-max_len:]
+            result = result[:padding_length]
         if padding and len(result) < padding_length:
             result.extend([self.pad_token] * (padding_length - len(result)))
 

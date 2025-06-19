@@ -1,11 +1,9 @@
 from torch import nn
 from transformers import BertModel, BertConfig
 
-from custom_tokenizers.jieba_tokenizer import JiebaLikeTokenizer
-
 
 class BertNextTokenModel(nn.Module):
-    def __init__(self, vocab_size, embed_dim=64, num_heads=2, ff_dim=128, num_layers=2, max_len=32, dropout=0.1, tokenizer=JiebaLikeTokenizer()):
+    def __init__(self, vocab_size, embed_dim=64, num_heads=2, ff_dim=128, num_layers=2, max_len=32, dropout=0.1):
         super().__init__()
         config = BertConfig(
             vocab_size=vocab_size,
