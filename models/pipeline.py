@@ -5,7 +5,6 @@ from models.model_instancies import model1
 from tools.t9_hanzi_converter import T9PinyinHanziConverter
 
 import os
-
 import re
 
 
@@ -20,7 +19,7 @@ class Pipeline:
         self.device = tokenizer.device
         self.model.to(self.device)
 
-    def predict(self, text, topk=2000, filter_by_digits=True):
+    def predict(self, text, topk=500, filter_by_digits=True):
         tokenized_dict = self.tokenizer(text, return_tensors=True, add_attention_mask=True)
         input_ids = tokenized_dict["input_ids"].unsqueeze(0)
         attention_mask = tokenized_dict["attention_mask"].unsqueeze(0)
